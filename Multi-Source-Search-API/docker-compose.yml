@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  search-engine:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - SERPAPI_KEY=${SERPAPI_KEY}
+      - SEMANTIC_SCHOLAR_KEY=${SEMANTIC_SCHOLAR_KEY}
+    env_file:
+      - .env
