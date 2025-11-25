@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Planlayıcı</title>
+</head>
+<body>
+  <h2>Chatbot Planlayıcı</h2>
+  <button id="calistir">Planı Oluştur</button>
+  <pre id="sonuc"></pre>
+
+  <script>
+    const plan = {
+      title: "chatbot",
+      description: "Kendimi tanıtan bir chatbot",
+      max_similar_projects: 3
+    };
+
+    document.getElementById("calistir").onclick = async () => {
+      const res = await fetch("http://127.0.0.1:8000/plan/from-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plan)
+      });
+      const data = await res.json();
+      document.getElementById("sonuc").textContent = JSON.stringify(data, null, 2);
+    };
+  </script>
+</body>
+</html>
