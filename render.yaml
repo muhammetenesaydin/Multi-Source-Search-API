@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: multi-source-search-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+    plan: free
+    autoDeploy: true
