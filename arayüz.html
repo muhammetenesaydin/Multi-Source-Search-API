@@ -2,29 +2,68 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <title>Planlayıcı</title>
+  <title>Kendi Fikrine Göre Roadmap Oluşturucu</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input, textarea, button { width: 100%; padding: 8px; font-size: 1rem; }
+    textarea { min-height: 100px; resize: vertical; }
+    button { margin-top: 20px; background: #0d47a1; color: #fff; border: none; cursor: pointer; }
+    button:disabled { background: #90caf9; }
+    pre { background: #f5f5f5; padding: 15px; white-space: pre-wrap; }
+  </style>
 </head>
 <body>
-  <h2>Chatbot Planlayıcı</h2>
-  <button id="calistir">Planı Oluştur</button>
-  <pre id="sonuc"></pre>
+
+  <h2>Kendi Proje Fikrine Göre Roadmap Oluştur</h2>
+
+  <label>Proje Başlığı</label>
+  <input id="title" type="text" placeholder="Örn: chatbot" value="chatbot">
+
+  <label>Proje Açıklaması (ne yapmak istediğini yaz)</label>
+  <textarea id="desc" placeholder="Örn: Kendimi tanıtan bir chatbot yapmak istiyorum"></textarea>
+
+  <label>Kaç benzer proje örneği incelensin?</label>
+  <input id="max" type="range" min="1" max="10" value="3">
+  <span id="maxVal">3</span>
+
+  <button id="run">Roadmap’i Oluştur</button>
+
+  <pre id="output">Sonuç burada görünecek…</pre>
 
   <script>
-    const plan = {
-      title: "chatbot",
-      description: "Kendimi tanıtan bir chatbot",
-      max_similar_projects: 3
-    };
+    const maxSlider = document.getElementById('max');
+    const maxVal    = document.getElementById('maxVal');
+    maxSlider.oninput = () => maxVal.textContent = maxSlider.value;
 
-    document.getElementById("calistir").onclick = async () => {
-      const res = await fetch("http://127.0.0.1:8000/plan/from-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(plan)
-      });
-      const data = await res.json();
-      document.getElementById("sonuc").textContent = JSON.stringify(data, null, 2);
+    document.getElementById('run').onclick = async () => {
+      const btn = document.getElementById('run');
+      btn.disabled = true;
+      btn.textContent = 'Oluşturuluyor…';
+
+      const payload = {
+        title: document.getElementById('title').value.trim(),
+        description: document.getElementById('desc').value.trim(),
+        max_similar_projects: parseInt(maxSlider.value)
+      };
+
+      try {
+        const res = await fetch('http://127.0.0.1:8000/plan/from-search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('HTTP hatası ' + res.status);
+        const data = await res.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('output').textContent = 'Hata: ' + err;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Roadmap’i Oluştur';
+      }
     };
   </script>
+
 </body>
 </html>

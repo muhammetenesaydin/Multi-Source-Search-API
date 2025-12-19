@@ -2,8 +2,6 @@
 FastAPI application for the multi-source search engine.
 """
 
-
-
 import asyncio
 import os
 import logging
@@ -17,8 +15,6 @@ from connectors.arxiv import ArxivConnector
 from connectors.semantic_scholar import SemanticScholarConnector
 from connectors.web_search import WebSearchConnector
 from aggregator import ResultAggregator, AIProjectPlanner
-
-
 
 
 logging.basicConfig(level=logging.INFO)

@@ -41,7 +41,8 @@ docker-compose up
 
 API uç noktası:
 ```
-GET /search?query=arama_sorgunuz&max_results=10
+uvicorn api.app:app --host 0.0.0.0 --port 8000 --log-level debug
+
 ```
 
 ## API Uç Noktaları

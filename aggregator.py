@@ -79,10 +79,11 @@ class AIProjectPlanner:
     def __init__(self):
         gemini_key = os.getenv("GEMINI_API_KEY")
         if not gemini_key:
-            raise ValueError("GEMINI_API_KEY bulunamadı")
-        
-        genai.configure(api_key=gemini_key)
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
+            logger.warning("GEMINI_API_KEY bulunamadı. AI planlama çalışmayacak, sadece fallback dönecek.")
+            self.model = None
+        else:
+            genai.configure(api_key=gemini_key)
+            self.model = genai.GenerativeModel("gemini-2.5-flash")
     
     async def create_project_plan(self, title: str, description: str, similar_projects: List[Dict]) -> Dict[str, Any]:
         """AI ile proje planı oluştur"""
@@ -95,23 +96,39 @@ Kullanıcı Açıklaması: {description}
 Bulunan benzer projeler:
 {json.dumps(similar_projects[:3], indent=2, ensure_ascii=False)}
 
-Bu bilgilere dayanarak detaylı bir proje planı oluştur. JSON formatında yanıt ver:
+Bu bilgilere dayanarak detaylı bir proje planı oluştur. JSON formatında yanıt ver. 
+Yapı şu hiyerarşide olmalı: Project -> Module -> UseCase -> Task.
 
 {{
   "project_summary": "Proje hakkında kısa analiz",
   "tech_stack": ["Python", "Flask"],
   "roadmap": [
     {{
-      "task": "Görev adı",
-      "priority": "high",
-      "estimated_hours": 8,
-      "description": "Detaylı açıklama"
+      "name": "Module Adı (örn: User Management)",
+      "description": "Modül açıklaması",
+      "use_cases": [
+        {{
+          "name": "UseCase Adı (örn: Register User)",
+          "description": "Use case açıklaması",
+          "tasks": [
+            {{
+              "task": "Görev adı",
+              "priority": "high",
+              "estimated_hours": 8,
+              "description": "Detaylı açıklama"
+            }}
+          ]
+        }}
+      ]
     }}
   ],
   "key_insights": ["İpucu 1", "İpucu 2"]
 }}"""
 
         try:
+            if not self.model:
+                raise ValueError("Model başlatılamadı (API Key yok)")
+
             response = await self.model.generate_content_async(prompt)
             
             # JSON'ı temizle
@@ -131,10 +148,22 @@ Bu bilgilere dayanarak detaylı bir proje planı oluştur. JSON formatında yan�
                 "tech_stack": ["Python"],
                 "roadmap": [
                     {
-                        "task": "Proje yapısını oluştur",
-                        "priority": "high",
-                        "estimated_hours": 16,
-                        "description": "Temel dosya yapısı"
+                        "name": "Core Module",
+                        "description": "Temel modül",
+                        "use_cases": [
+                            {
+                                "name": "Setup",
+                                "description": "Kurulum işlemleri",
+                                "tasks": [
+                                    {
+                                        "task": "Proje yapısını oluştur",
+                                        "priority": "high",
+                                        "estimated_hours": 16,
+                                        "description": "Temel dosya yapısı"
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ],
                 "key_insights": ["Basit başla", "Kademeli geliştir"]

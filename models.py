@@ -46,9 +46,19 @@ class Task(BaseModel):
     estimated_hours: int
     description: str
 
+class UseCase(BaseModel):
+    name: str
+    description: str
+    tasks: List[Task]
+
+class Module(BaseModel):
+    name: str
+    description: str
+    use_cases: List[UseCase]
+
 class RoadmapResponse(BaseModel):
     project_summary: str
     tech_stack: List[str]
-    roadmap: List[Task]
+    roadmap: List[Module]
     similar_projects_found: int
     key_insights: List[str]
